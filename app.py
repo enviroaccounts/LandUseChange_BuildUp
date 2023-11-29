@@ -16,16 +16,39 @@ def prepare_builtup_area_chart_data(data_df):
 
 def create_builtup_area_pie_chart(labels, values):
     """Creates a pie chart for built-up area land use data."""
-    return go.Figure(data=[go.Pie(labels=labels, values=values)])
+    # Calculate percentages and create custom text labels
+    total = sum(values)
+    percents = [(v / total * 100) for v in values]
+    custom_text = [f"<1%" if 0 < p < 1 else f"{p:.0f}%" for p in percents]
+
+    pie_chart = go.Pie(
+        labels=labels,
+        values=values,
+        textinfo='label+percent',
+        hoverinfo='label+percent',
+        hovertemplate='<b>%{label}</b><br>%{percent:.0%}<br>Total: %{value}<extra></extra>',
+        texttemplate=custom_text  # Use custom text labels
+    )
+
+    fig = go.Figure(data=[pie_chart])
+    fig.update_layout(
+        title={
+            'text': "What was all this urbanised land before 1990?",
+            'y': 0.08,  # Adjust the vertical position
+            'x': 0.5,  # Center the title horizontally
+            'xanchor': 'center',
+            'yanchor': 'bottom'
+        }
+    )
+
+    return fig
+
 
 def setup_builtup_area_layout(app, fig_pie_chart):
     """Sets up the layout of the Dash app for built-up area visualization."""
     app.layout = html.Div(children=[
         html.Div([
             dcc.Graph(id='builtup-area-pie-chart', figure=fig_pie_chart)
-        ]),
-        html.Div([  
-            html.H3(id='builtup-area-pie-chart-description', children='What was all this urbanised land before 1990?')
         ])
     ], id='builtup-area-pie-chart-layout')
 
